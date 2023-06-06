@@ -1,11 +1,23 @@
 // @flow
+import type {ChildrenArray as ReactChildrenArray, Element as ReactElement} from "react";
 import * as React from "react";
 
-import { deepEqual } from "fast-equals";
+import {deepEqual} from "fast-equals";
 import clsx from "clsx";
+// Types
+import type {
+  CompactType,
+  DragOverEvent,
+  DroppingPosition,
+  GridDragEvent,
+  GridResizeEvent,
+  Layout,
+  LayoutItem
+} from "./utils";
 import {
   bottom,
   childrenEqual,
+  cloneLayout,
   cloneLayoutItem,
   compact,
   compactType,
@@ -18,27 +30,12 @@ import {
   withLayoutItem
 } from "./utils";
 
-import { calcXY } from "./calculateUtils";
+import type {PositionParams} from "./calculateUtils";
+import {calcXY} from "./calculateUtils";
 
 import GridItem from "./GridItem";
+import type {DefaultProps, Props} from "./ReactGridLayoutPropTypes";
 import ReactGridLayoutPropTypes from "./ReactGridLayoutPropTypes";
-import type {
-  ChildrenArray as ReactChildrenArray,
-  Element as ReactElement
-} from "react";
-
-// Types
-import type {
-  CompactType,
-  GridResizeEvent,
-  GridDragEvent,
-  DragOverEvent,
-  Layout,
-  DroppingPosition,
-  LayoutItem
-} from "./utils";
-
-import type { PositionParams } from "./calculateUtils";
 
 type State = {
   activeDrag: ?LayoutItem,
@@ -54,8 +51,6 @@ type State = {
   compactType?: CompactType,
   propsLayout?: Layout
 };
-
-import type { Props, DefaultProps } from "./ReactGridLayoutPropTypes";
 
 // End Types
 
@@ -275,7 +270,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     const { oldDragItem } = this.state;
     let { layout } = this.state;
     const { cols, allowOverlap, preventCollision } = this.props;
-    const l = getLayoutItem(layout, i);
+    const l = cloneLayoutItem(getLayoutItem(layout, i));
     if (!l) return;
 
     // Create placeholder (display only)
@@ -291,7 +286,7 @@ export default class ReactGridLayout extends React.Component<Props, State> {
     // Move the element to the dragged location.
     const isUserAction = true;
     layout = moveElement(
-      layout,
+      cloneLayout(layout),
       l,
       x,
       y,
